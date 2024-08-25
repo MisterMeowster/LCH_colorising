@@ -18,19 +18,29 @@ bw_picture=np.zeros((1,1))
 new_picture=np.zeros((1,1))
 points=[]
 
-#Объект окна ввода пути до изображения
-class Window1(tk.Tk):
-    def __init__(self):
+
+
+        
+class Window(tk.Tk):
+    def __init__(self,textlbl,textb1,textb2,textb3,comb1,comb2,comb3):
         super().__init__()
-        #Создаем все объекты для графического интерфейса
-        self.text = 'Введите путь до файла и нажмите "Enter"'
+        self.text = textlbl
         self.selected_file_entry = tk.Entry(self)
         self.selected_file_out = ''
         self.text_label = tk.Label(text=self.text)
-        self.button1 = tk.Button(self, text="Обзор...", command=self.open_file_browser)
-        self.button2 = tk.Button(self, text="Закрыть", command=self.back)
-        self.button3 = tk.Button(self, text="Сохранить путь", command=self.forward)
+        self.button1 = tk.Button(self, text=textb1, command=comb1)
+        self.button2 = tk.Button(self, text=textb2, command=comb2)
+        self.button3 = tk.Button(self, text=textb3, command=comb3)
         self.withdraw()
+
+
+#Объект окна ввода пути до изображения
+class Window1(Window):
+    def __init__(self):
+        super().__init__(textlbl='Введите путь до файла и нажмите "Enter"',
+                         textb1="Обзор...",textb2="Закрыть",textb3="Сохранить путь",
+                         comb1=self.open_file_browser,comb2=self.back,
+                         comb3=self.forward)
         
 
     def make_win(self):
@@ -96,8 +106,9 @@ class Window1(tk.Tk):
         self.destroy()
         w2.destroy()
         w3.destroy()
-        we.destroy()
+        we1.destroy()
         we2.destroy()
+        we3.destroy()
     
 
             
@@ -178,35 +189,8 @@ class Window2(tk.Tk):
         
         
     def check(self):
-        angle_dif = float(self.text_entry.get())
-        angle_dif_rad=math.radians(angle_dif)
-        fc1_LCH=np.array((50,100,0),dtype=np.float64)
-        fc2_LCH=np.array((50,100,angle_dif_rad),dtype=np.float64)
-        fc1_lab=lch2lab(fc1_LCH)
-        fc1=lab2rgb(fc1_lab)
-        fc2_lab=lch2lab(fc2_LCH)
-        fc2=lab2rgb(fc2_lab)
-        fc1=fc1.tolist()
-        fc2=fc2.tolist()
-        
-        # Создаем фигуру и оси
-        fig, ax = plt.subplots()
-        # Создаем первый квадрат
-        square1 = plt.Rectangle((0, 0), 0.45, 1, color=fc1)
-        ax.add_patch(square1)
-        # Создаем второй квадрат
-        square2 = plt.Rectangle((0.55, 0), 0.45, 1, color=fc2)
-        ax.add_patch(square2)
-
-        # Устанавливаем пределы осей
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 1)
-
-        # Убираем оси
-        ax.axis('off')
-
-        # Показать график
-        plt.show()
+        checkcolors=CheckColors(self.text_entry.get())
+        checkcolors.show_check()
         
         
     #Функция закрытия окна    
@@ -253,84 +237,55 @@ class Window3(tk.Tk):
     def back(self):
         w2.make_win()
         self.withdraw()
-    
+
+
+class ErrorWindow(tk.Tk):
+    def __init__(self,text):
+        super().__init__()
+        self.text_label = tk.Label(self, text=text)
+        self.withdraw()
+        self.button = tk.Button(self, text="OK", command=self.close_window, width=6)
+        
+    def close_window(self):
+        self.withdraw()
+
+    def make_win(self):
+        self.title("Coloriser0.8")
+
+        self.text_label.pack(padx=10, pady=10)
+
+        self.button.pack(padx=10, pady=10)
+        
+        self.deiconify()
+
+        self.mainloop()
+        
 
 #Окно ошибки
-class ErrorWindow(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.text = '''ВНИМАНИЕ!!! Для некоторых градаций яркости не хватает набора цветовых 
-        оттенков. Для более точного результата уменьшите значение H'''
-        self.withdraw()
-        
-    def close_window(self):
-        self.destroy()
-        self.withdraw()
-
-    def make_win(self):
-        self.title("Coloriser0.8")
-
-        text_label = tk.Label(self, text=self.text)
-        text_label.pack(padx=10, pady=10)
-
-        button = tk.Button(self, text="OK", command=self.close_window, width=6)
-        button.pack(padx=10, pady=10)
-        
-        self.deiconify()
-
-        self.mainloop()
-
-
-class ErrorWindow2(tk.Tk):
+class ErrorWindow1(ErrorWindow):
     
     def __init__(self):
-        super().__init__()
-        self.text = 'Файла по указанному адресу не найдено. Попробуйте еще раз'
-        self.withdraw()
-            
-    def close_window(self):
-        self.destroy()
-        self.withdraw()
+        super().__init__(text='''ВНИМАНИЕ!!! Для некоторых градаций яркости не хватает набора цветовых 
+        оттенков. Для более точного результата уменьшите значение H''')
+        
+        
 
-    def make_win(self):
-        self.title("Coloriser0.8")
 
-        text_label = tk.Label(self, text=self.text)
-        text_label.pack(padx=10, pady=10)
-
-        button = tk.Button(self, text="OK", command=self.close_window, width=6)
-        button.pack(padx=10, pady=10)
-             
-        self.deiconify()
-
-        self.mainloop()
+class ErrorWindow2(ErrorWindow):
+    
+    def __init__(self):
+        super().__init__(text = 'Файла по указанному адресу не найдено. Попробуйте еще раз')
+        
         
 
 
 
-class ErrorWindow3(tk.Tk):
+class ErrorWindow3(ErrorWindow):
     
     def __init__(self):
-        super().__init__()
+        super().__init__(text = 'Неправильное расширение выбранного файла')
         self.text = 'Неправильное расширение выбранного файла'
-        self.withdraw()
-            
-    def close_window(self):
-        self.destroy()
-        self.withdraw()
-
-    def make_win(self):
-        self.title("Coloriser0.8")
-
-        text_label = tk.Label(self, text=self.text)
-        text_label.pack(padx=10, pady=10)
-
-        button = tk.Button(self, text="OK", command=self.close_window, width=6)
-        button.pack(padx=10, pady=10)
-             
-        self.deiconify()
-
-        self.mainloop()
+       
 
 
 
@@ -399,6 +354,40 @@ class Picture():
 
 
 
+class CheckColors():
+    
+    def __init__(self,angle_dif):
+        self.angle_dif = math.radians(float(angle_dif))
+        
+        
+    def show_check(self):
+        fc1_LCH=np.array((50,100,0),dtype=np.float64)
+        fc2_LCH=np.array((50,100,self.angle_dif),dtype=np.float64)
+        fc1=lab2rgb(lch2lab(fc1_LCH)).tolist()
+        fc2=lab2rgb(lch2lab(fc2_LCH)).tolist()
+
+        
+        # Создаем фигуру и оси
+        fig, ax = plt.subplots()
+        # Создаем первый квадрат
+        square1 = plt.Rectangle((0, 0), 0.45, 1, color=fc1)
+        ax.add_patch(square1)
+        # Создаем второй квадрат
+        square2 = plt.Rectangle((0.55, 0), 0.45, 1, color=fc2)
+        ax.add_patch(square2)
+
+        # Устанавливаем пределы осей
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+
+        # Убираем оси
+        ax.axis('off')
+
+        # Показать график
+        plt.show()
+    
+
+
 
 class NewPicture():
     
@@ -426,7 +415,7 @@ class NewPicture():
 w1=Window1()
 w2=Window2()
 w3=Window3()
-we=ErrorWindow()
+we1=ErrorWindow1()
 we2=ErrorWindow2()
 we3=ErrorWindow3()
 w1.make_win()
