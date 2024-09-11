@@ -7,285 +7,19 @@ This is a temporary script file.
 
 import math
 import numpy as np
-import tkinter as tk
-from tkinter import filedialog
 import matplotlib.pyplot as plt
 from skimage.color import lch2lab, lab2rgb
-from PIL import Image
+import tkinter as tk
+from tkinter import filedialog
+from PIL import Image, UnidentifiedImageError
+from ewnds import ErrorWindow1, ErrorWindow2, ErrorWindow3, ErrorWindow4,ErrorWindow5,ErrorWindow6
 
 picture=np.zeros((1,1))
 bw_picture=np.zeros((1,1))
 new_picture=np.zeros((1,1))
 points=[]
-
-
-
-        
-class Window(tk.Tk):
-    def __init__(self,textlbl,textb1,textb2,textb3,comb1,comb2,comb3):
-        super().__init__()
-        self.text = textlbl
-        self.selected_file_entry = tk.Entry(self)
-        self.selected_file_out = ''
-        self.text_label = tk.Label(text=self.text)
-        self.button1 = tk.Button(self, text=textb1, command=comb1)
-        self.button2 = tk.Button(self, text=textb2, command=comb2)
-        self.button3 = tk.Button(self, text=textb3, command=comb3)
-        self.withdraw()
-
-
-#Объект окна ввода пути до изображения
-class Window1(Window):
-    def __init__(self):
-        super().__init__(textlbl='Введите путь до файла и нажмите "Enter"',
-                         textb1="Обзор...",textb2="Закрыть",textb3="Сохранить путь",
-                         comb1=self.open_file_browser,comb2=self.back,
-                         comb3=self.forward)
-        
-
-    def make_win(self):
-        #Размещаем созданные в __init__ объекты для графического интерфейса
-        self.title("Coloriser0.8")
-
-        # Устанавливаем размер окна в пикселях (ширина x высота)
-        self.geometry("400x150")
-        
-        # Запрет изменения размеров окна
-        self.resizable(False, False)
-
-        self.text_label.grid(row=0, column=0, padx=10, pady=10)
-
-        self.selected_file_entry.config(width=40)
-        self.selected_file_entry.grid(row=1, column=0, padx=10, pady=10,sticky="w")
-
-        self.button1.grid(row=1, column=1, padx=10, pady=10, sticky="e")
-        self.button2.grid(row=2, column=0, padx=10, pady=10, sticky="w")
-        self.button3.grid(row=2, column=1, padx=10, pady=10)
-        
-        self.deiconify()
-        
-        self.mainloop()
-        
-
-
-    def open_file_browser(self):
-        file_path = tk.filedialog.askopenfilename(title="Выберите файл")
-        self.selected_file_entry.delete(0, tk.END)  # Очищаем текстовое поле
-        self.selected_file_entry.insert(0, file_path)  # Вставляем путь к выбранному файлу
-
-    # Функция, "далее"
-    def forward(self):
-        
-        self.selected_file_out = self.selected_file_entry.get()
-        if self.selected_file_out and self.selected_file_out.endswith(('.jpg','.png')):
-            try:
-                with open(self.selected_file_out):
-                   global picture
-                   picture=Picture(address=self.selected_file_out)
-                   width,height = picture.pict.size
-                   global new_picture
-                   new_picture=np.zeros((height, width), 'uint8')
-                   global bw_picture
-                   bw_picture = picture.pict.convert('L')
-                    
-                   w2.make_win()
-                   w1.withsraw()
-                   
-            except FileNotFoundError:
-                we2.make_win()
-                self.withdraw()
-        else:
-            we3.make_win()
-            self.withdraw()
-        
-
-
-
-    #Функция закрытия окна    
-    def back(self):
-        self.destroy()
-        w2.destroy()
-        w3.destroy()
-        we1.destroy()
-        we2.destroy()
-        we3.destroy()
-    
-
-            
-    
-
-#Окно ввода разницы H 
-class Window2(tk.Tk):
-    
-    def __init__(self):
-        super().__init__()
-        #Создаем все объекты для графического интерфейса
-        self.text = 'Введите в текстовое поле справа разницу между двумя углами, вычисляемую в этом приложении в виде разницы углов H между соотвующими цветами. После ввода нажмите кнопку "Проверить". Если затрудняетесь, можете поэкспериментировать с разными значениями.'
-        #Создаем фреймы
-        self.frame1 = tk.Frame(self, width=200, height=200)
-        self.frame2 = tk.Frame(self, width=100, height=100)
-        self.frame3 = tk.Frame(self, width=200, height=200)
-        self.frame4 = tk.Frame(self, width=200, height=200)
-        #Создаем кнопки и прочее
-        self.button1 = tk.Button(self.frame2, text="Проверить",command=self.check)
-        self.button2 = tk.Button(self.frame3, text="Назад", command=self.back)
-        self.button3 = tk.Button(self.frame4, text="Сохранить значение", command=self.forward)
-        
-        self.text_label = tk.Label(self.frame1, text=self.text, wraplength=200,justify="left")
-
-        
-        self.text_entry = tk.Entry(self.frame2)
-        
-        self.withdraw()
-            
-        
-    def make_win(self):
-        #Размещаем созданные в __init__ объекты для графического интерфейса
-        # Создаем основное окно
-        self.title("Coloriser0.8")
-        
-        # Устанавливаем размер окна в пикселях (ширина x высота)
-        self.geometry("350x200")
-        
-        # Запрет изменения размеров окна
-        self.resizable(False, False)
-
-        # Размещаем фреймы в окне
-        self.frame1.grid(row=0, column=0)
-        self.frame2.grid(row=0, column=1)
-        self.frame3.grid(row=1, column=0)
-        self.frame4.grid(row=1, column=1)
-
-        # Добавляем текст в первый фрейм
-        self.text_label.pack()
-
-        # Размещаем текстовое поле во втором фрейме
-        self.text_entry.pack()
-        
-        #Размещаем кнопки
-        self.button1.pack(side=tk.BOTTOM)
-        self.button2.pack(side=tk.LEFT, pady=10)
-        self.button3.pack(side=tk.LEFT, pady=10)
-        
-        self.deiconify()
-
-        # Запускаем главный цикл приложения
-        self.mainloop()
-        
-    
-    def forward(self):
-        self.user_input = float(self.text_entry.get())
-        global points
-        points=ColorPoints(self.user_input)
-        points.make_points()
-        global new_picture
-        new_picture=NewPicture(bw_picture, new_picture, points)
-        new_picture.colorise()
-        plt.imshow(new_picture)
-        plt.axis('off')
-        plt.show()
-        w3.make_win()
-        self.withdraw()
-        
-        
-    def check(self):
-        checkcolors=CheckColors(self.text_entry.get())
-        checkcolors.show_check()
-        
-        
-    #Функция закрытия окна    
-    def back(self):
-        w1.make_win()
-        self.withdraw()
-            
-            
-
-class Window3(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.button1 = tk.Button(self, text="Отмена", command=self.back)
-        self.button2 = tk.Button(self, text="Сохранить изображение", command=self.forward)
-        self.withdraw()
-        
-        
-    def make_win(self):
-        self.title("Coloriser0.8")
-
-        # Устанавливаем размер окна в пикселях (ширина x высота)
-        self.geometry("250x70")
-        
-        # Запрет изменения размеров окна
-        self.resizable(False, False)
-
-        self.button1.grid(row=2, column=0, padx=10, pady=10, sticky="w")
-
-        self.button2.grid(row=2, column=1, padx=10, pady=10, sticky="w")
-        
-        self.deiconify()
-
-        self.mainloop()
-        
-    
-
-    # Функция открытия окна диалога
-    def forward(self):
-        self.pathtosave = tk.filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=[("JPEG", "*.jpg"), ("All Files", "*.*")])
-        new_picture.save(self.pathtosave)
-        self.withdraw()
-
-    #Функция закрытия окна    
-    def back(self):
-        w2.make_win()
-        self.withdraw()
-
-
-class ErrorWindow(tk.Tk):
-    def __init__(self,text):
-        super().__init__()
-        self.text_label = tk.Label(self, text=text)
-        self.withdraw()
-        self.button = tk.Button(self, text="OK", command=self.close_window, width=6)
-        
-    def close_window(self):
-        self.withdraw()
-
-    def make_win(self):
-        self.title("Coloriser0.8")
-
-        self.text_label.pack(padx=10, pady=10)
-
-        self.button.pack(padx=10, pady=10)
-        
-        self.deiconify()
-
-        self.mainloop()
-        
-
-#Окно ошибки
-class ErrorWindow1(ErrorWindow):
-    
-    def __init__(self):
-        super().__init__(text='''ВНИМАНИЕ!!! Для некоторых градаций яркости не хватает набора цветовых 
-        оттенков. Для более точного результата уменьшите значение H''')
-        
-        
-
-
-class ErrorWindow2(ErrorWindow):
-    
-    def __init__(self):
-        super().__init__(text = 'Файла по указанному адресу не найдено. Попробуйте еще раз')
-        
-        
-
-
-
-class ErrorWindow3(ErrorWindow):
-    
-    def __init__(self):
-        super().__init__(text = 'Неправильное расширение выбранного файла')
-        self.text = 'Неправильное расширение выбранного файла'
-       
+width=0
+height=0
 
 
 
@@ -297,8 +31,6 @@ class ColorPoints():
         self.L_min=0
         self.C_max=90
         self.L_start=43.5
-        self.C_start=90
-        self.H_start=0
         self.H_max=360
         self.H_dif=H_dif
         self.min_dist=0
@@ -357,35 +89,40 @@ class Picture():
 class CheckColors():
     
     def __init__(self,angle_dif):
-        self.angle_dif = math.radians(float(angle_dif))
+        try:
+            self.angle_dif = math.radians(float(angle_dif))
+        except:
+            we6.make_win()
         
         
     def show_check(self):
-        fc1_LCH=np.array((50,100,0),dtype=np.float64)
-        fc2_LCH=np.array((50,100,self.angle_dif),dtype=np.float64)
-        fc1=lab2rgb(lch2lab(fc1_LCH)).tolist()
-        fc2=lab2rgb(lch2lab(fc2_LCH)).tolist()
-
+        if self.angle_dif>0:
+            fc1_LCH=np.array((50,100,0),dtype=np.float64)
+            fc2_LCH=np.array((50,100,self.angle_dif),dtype=np.float64)
+            fc1=lab2rgb(lch2lab(fc1_LCH)).tolist()
+            fc2=lab2rgb(lch2lab(fc2_LCH)).tolist()
         
-        # Создаем фигуру и оси
-        fig, ax = plt.subplots()
-        # Создаем первый квадрат
-        square1 = plt.Rectangle((0, 0), 0.45, 1, color=fc1)
-        ax.add_patch(square1)
-        # Создаем второй квадрат
-        square2 = plt.Rectangle((0.55, 0), 0.45, 1, color=fc2)
-        ax.add_patch(square2)
-
-        # Устанавливаем пределы осей
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 1)
-
-        # Убираем оси
-        ax.axis('off')
-
-        # Показать график
-        plt.show()
+                
+            # Создаем фигуру и оси
+            fig, ax = plt.subplots()
+            # Создаем первый квадрат
+            square1 = plt.Rectangle((0, 0), 0.45, 1, color=fc1)
+            ax.add_patch(square1)
+            # Создаем второй квадрат
+            square2 = plt.Rectangle((0.55, 0), 0.45, 1, color=fc2)
+            ax.add_patch(square2)
+        
+            # Устанавливаем пределы осей
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
     
+            # Убираем оси
+            ax.axis('off')
+        
+            # Показать график
+            plt.show()
+        else:
+            we5.make_win()
 
 
 
@@ -404,20 +141,257 @@ class NewPicture():
         
     def colorise(self):
         global new_picture
-        width,height = picture.pict.size
         new_picture= bw_picture.convert('RGB')
         for i in range(width):
             for j in range(height):
                 pixel_value = bw_picture.getpixel((i,j))
                 new_picture.putpixel((i, j), points[pixel_value])
+
+
+
+def forwardwin1(value):
+    txtfrtextfield = value
+    if txtfrtextfield:
+        try:
+            
+            with open(txtfrtextfield):
+               global picture
+               picture=Picture(address=txtfrtextfield)
+               global width
+               global height
+               width,height = picture.pict.size
+               global new_picture
+               new_picture=np.zeros((height, width), 'uint8')
+               global bw_picture
+               bw_picture = picture.pict.convert('L')
+                
+               w2.make_win()
+               
+        except FileNotFoundError:
+            we2.make_win()
+            
+        except UnidentifiedImageError:
+            we3.make_win()
+            
+    else:
+        we4.make_win()
+    
+
+def forwardwin2(value):
+    if value>0:
+        try:
+            global points
+            points=ColorPoints(value)
+            points.make_points()
+            global new_picture
+            new_picture=NewPicture(bw_picture, new_picture, points)
+            new_picture.colorise()
+            plt.imshow(new_picture)
+            plt.axis('off')
+            plt.show()
+            w3.make_win()
+        except (IndexError,ValueError):
+            we1.make_win()
+    else:
+        we5.make_win()
+        
+
+def checkwin2(value):
+        checkcolors=CheckColors(value)
+        checkcolors.show_check()
+
+def forwardwin3(value):
+    new_picture.save(value)
+
+
+
+class BackButton:
+    def __init__(self, master, prwin):
+        self.prwin = prwin
+        self.button = tk.Button(master, text='Назад', command=self.back)
+        
+
+    def back(self):
+        self.prwin.make_win()
+        self.withdraw()
+        
+    def pack (self,side,anchor,padx,pady):
+        self.button.pack(side=side,anchor=anchor,padx=padx,pady=pady)
+        
+
+
+        
+
+class Window(tk.Tk):
+    
+    def __init__(self,pastwin):
+        super().__init__()
+        self.textfield = tk.Entry(self)
+        self.txtfrtextfield = ''
+        self.button2 = BackButton(self,pastwin)
+        self.button3 = tk.Button(self, text="Далее", command=self.forward)
+        self.button3.pack(side='right',anchor='s',padx=10,pady=10)
+        self.withdraw()
+        
+
+    def make_win(self):
+        #Размещаем созданные в __init__ объекты для графического интерфейса
+        self.title("Coloriser0.8")
+
+        # Устанавливаем размер окна в пикселях (ширина x высота)
+        
+        # Запрет изменения размеров окна
+        self.resizable(False, False)
+        self.deiconify()
+        self.mainloop()
+        
+    
+    def forward(self):
+        pass
+    
+
+#Объект окна ввода пути до изображения
+class Window1(Window):
+    def __init__(self,pastwin):
+        super().__init__(None)
+        self.geometry("500x130")
+        self.textfield.config(width=40)
+        self.label = tk.Label(self,text='Введите путь до файла')
+        self.button1 = tk.Button(self, text="Обзор...", command=self.open_file_browser)
+        self.button2 = tk.Button(self, text="Закрыть", command=self.close)
+        self.button3 = tk.Button(self, text="Далее", command=self.forward)
+        self.button1.pack(side="right")
+        self.button2.pack(side='left',anchor='s',padx=10,pady=10)
+        self.label.pack(side="top",anchor='s')
+        self.textfield.pack(side='top',pady=35)
+        
+                
+
+
+    # Функция, "далее"
+    def forward(self):
+        
+        forwardwin1(self.textfield.get())
+        self.withdraw()
+
+
+
+    def open_file_browser(self):
+        file_path = tk.filedialog.askopenfilename(title="Выберите файл")
+        self.textfield.delete(0, tk.END)  # Очищаем текстовое поле
+        self.textfield.insert(0, file_path)  # Вставляем путь к выбранному файлу
+        
+    
+    
+    #Функция закрытия окна    
+    def close(self):
+        self.destroy()
+        w2.destroy()
+        w3.destroy()
+        we1.destroy()
+        we2.destroy()
+        we3.destroy()
+        we4.destroy()
+    
+
+            
+    
+
+#Окно ввода разницы H 
+class Window2(Window):
+    
+    def __init__(self,pastwin):
+        super().__init__(w1)
+        self.geometry("700x200")
+        self.textfield.config(width=10)
+        #Создаем все объекты для графического интерфейса
+        self.label = tk.Label(self,text='Введите в текстовое поле справа разницу между двумя углами,\nвычисляемую в этом приложении в виде разницы углов H \nмежду соотвующими цветами.\nПосле ввода нажмите кнопку "Проверить". Если затрудняетесь,\nможете поэкспериментировать с разными значениями.',justify='left')
+        #Создаем кнопки и прочее
+        self.button1 = tk.Button(self, text="Проверить",command=self.check)
+        self.button3 = tk.Button(self, text="Далее", command=self.forward)
+        self.label.pack(side='top')
+        self.button1.pack(side='top',pady=10)
+        self.textfield.pack(side='top')
+        self.button2.pack(side='left', anchor="s",padx=10,pady=10)
+        
+        
+    
+    def forward(self):
+        try:
+            forwardwin2(float(self.textfield.get()))
+        except ValueError:
+            we6.make_win()
+        self.withdraw()
+        
+        
+    def check(self):
+        checkwin2(self.textfield.get())
+        
+            
+            
+
+class Window3(Window):
+    def __init__(self,pastwin):
+        super().__init__(w2)
+        self.geometry("500x130")
+        self.textfield.config(width=40)
+        self.label = tk.Label(self,text='Введите адрес для сохранения файла')
+        self.button1 = tk.Button(self, text="Обзор...", command=self.open_file_browser)
+        self.button3 = tk.Button(self, text="Далее", command=self.forward)
+        self.button1.pack(side="right")
+        self.button2.pack(side='left',anchor='s',padx=10,pady=10)
+        self.label.pack(side="top",anchor='s')
+        self.textfield.pack(side='top',pady=35)
+        
+
+        
+    
+
+    # Функция открытия окна диалога
+    def open_file_browser(self):
+        file_path = tk.filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=[("JPEG", "*.jpg"), ("All Files", "*.*")])
+        self.textfield.delete(0, tk.END)  # Очищаем текстовое поле
+        self.textfield.insert(0, file_path)  # Вставляем путь к выбранному файлу
+        self.make_win()
+        
+        
+    def forward(self):
+        forwardwin3(self.textfield.get())
+        self.withdraw()
+
+
+
+
+class ErrorWindow(tk.Tk):
+    def __init__(self,text):
+        super().__init__()
+        self.label = tk.Label(self, text=text)
+        self.withdraw()
+        self.button = tk.Button(self, text="OK", command=self.close_window, width=6)
+        
+    def close_window(self):
+        self.withdraw()
+
+    def make_win(self):
+        self.title("Coloriser0.8")
+        self.geometry("500x100")
+        self.label.pack()
+        self.button.pack()
+        self.deiconify()
+        self.mainloop()
+        
+
        
             
-w1=Window1()
-w2=Window2()
-w3=Window3()
+w1=Window1(None)
+w2=Window2(w1)
+w3=Window3(w2)
 we1=ErrorWindow1()
 we2=ErrorWindow2()
 we3=ErrorWindow3()
+we4=ErrorWindow4()
+we5=ErrorWindow5()
+we6=ErrorWindow6()
 w1.make_win()
 
 
